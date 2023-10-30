@@ -67,15 +67,15 @@ let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
 (* return the prefix and the suffix of the first occurrence of a slice,
    or None if this occurrence does not exist.
 *)
+(* j'ai l'impression qu'on peut remplacer le match par cut_prefix mais bizarre *)
 let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
-  let rec slice before after =
+  let rec aux_first_occ slice before after =
     match (slice, after) with 
     | ([], []) -> Some (before, [])
     | (_, []) -> None
     | ([], _) -> Some (before, after)
-    | (a :: aa, b :: bb) -> slice (before @ [a]) bb
-  in slice [] list
-
+    | (a :: aa, b :: bb) -> aux_first_occ aa (before @ [b]) bb
+  in aux_first_occ slice [] list
 (*
   first_occ [1; 2] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([1; 1], [3; 4; 1; 2])
   first_occ [1; 1] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([], [1; 2; 3; 4; 1; 2])
@@ -83,14 +83,20 @@ let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
  *)
 
 
-let rec slices_between
-          (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
-  failwith "A faire"
-
+ let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
+  match first_occ start list with
+  | None -> []
+  | Some (before, after) -> 
+    match first_occ stop after with
+    | None -> []
+    | Some (between, after) -> between :: slices_between start stop after
+    
 (*
-  slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
- *)
-
+slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
+slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]]
+slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; []]
+*)
+    
 let cut_genes (dna : dna) : (dna list) =
   failwith "A faire"
 
