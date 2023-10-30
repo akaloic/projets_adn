@@ -9,7 +9,7 @@ type dna = base list
 
 let string_of_base (b : base) : string =
   match b with
-    A -> "A"
+  | A -> "A"
   | C -> "C"
   | G -> "G"
   | T -> "T"
@@ -18,8 +18,8 @@ let string_of_base (b : base) : string =
 (* explode a string into a char list *)
 let rec explode (str : string) : char list =
   match str with
-  | "" -> None
-  | s :: res -> s :: explode res
+  | "" -> []
+  | _ -> str.[0] :: explode (String.sub str 1 ((String.length str) - 1))
 
 (* conversions *)
 let base_of_char (c : char) : base =
@@ -29,15 +29,16 @@ let base_of_char (c : char) : base =
   | 'G' -> G
   | 'T' -> T
   | '.' -> WC
+  | _ -> failwith "le caractère n'est pas une base"
 
 let dna_of_string (s : string) : base list =
-  List.filter (fun c -> base_of_char c) explode s
+  List.map (fun c -> base_of_char c) (explode s)
 
 let string_of_dna (seq : dna) : string =
   let rec aux seq str = 
     match seq with
-    | None -> str
-    | b :: res -> aux res (str ^ (string_of_base b))
+    | [] -> str
+    | b :: bs -> aux bs (str ^ (string_of_base b))
   in aux seq ""
 
 (*---------------------------------------------------------------------------*)
@@ -54,8 +55,10 @@ let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
   match (slice, list) with 
   | ([], []) -> Some []
   | (_, []) -> None
-  | ([], _) -> Some _
-  | (a :: aa, b :: bb) -> cut_prefix aa bb
+  | ([], res) -> Some res
+  | (a :: aa, b :: bb) -> 
+    if a=b then cut_prefix aa bb
+    else None
 
 (*
   cut_prefix [1; 2; 3] [1; 2; 3; 4] = Some [4]
@@ -67,27 +70,33 @@ let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
 (* return the prefix and the suffix of the first occurrence of a slice,
    or None if this occurrence does not exist.
 *)
-(* j'ai l'impression qu'on peut remplacer le match par cut_prefix mais bizarre *)
 let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
   let rec aux_first_occ slice before after =
-    match (slice, after) with 
-    | ([], []) -> Some (before, [])
-    | (_, []) -> None
-    | ([], _) -> Some (before, after)
-    | (a :: aa, b :: bb) -> aux_first_occ aa (before @ [b]) bb
-  in aux_first_occ slice [] list
+    let rec enleve_n lst n = 
+      match lst with
+      | [] -> []
+      | _ :: ll -> if n = 0 then lst else enleve_n ll (n-1)
+    in
+    match cut_prefix slice after with 
+      | None -> aux_first_occ slice (before @ [List.hd after]) (enleve_n after 1)
+      | Some _ -> 
+        if List.length after >= List.length slice then
+          Some (before, enleve_n after (List.length slice))
+        else None
+    in aux_first_occ slice [] list
+
+
 (*
   first_occ [1; 2] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([1; 1], [3; 4; 1; 2])
   first_occ [1; 1] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([], [1; 2; 3; 4; 1; 2])
   first_occ [1; 3] [1; 1; 1; 2; 3; 4; 1; 2] = None
  *)
 
-
  let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
   match first_occ start list with
   | None -> []
   | Some (before, after) -> 
-    match first_occ stop after with
+    match first_occ stop aft with
     | None -> []
     | Some (between, after) -> between :: slices_between start stop after
     
@@ -98,7 +107,7 @@ slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T;
 *)
     
 let cut_genes (dna : dna) : (dna list) =
-  failwith "A faire"
+
 
 (*---------------------------------------------------------------------------*)
 (*                          CONSENSUS SEQUENCES                              *)
