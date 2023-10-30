@@ -2,8 +2,6 @@ type base = A | C | G | T | WC (* wildcard *)
 
 type dna = base list
 
-
-
 (*---------------------------------------------------------------------------*)
 (*                               ECHAUFFEMENT                                *)
 (*---------------------------------------------------------------------------*)
@@ -17,25 +15,30 @@ let string_of_base (b : base) : string =
   | T -> "T"
   | WC -> "."
 
-
 (* explode a string into a char list *)
-let explode (str : string) : char list =
-  failwith "À compléter"
-
+let rec explode (str : string) : char list =
+  match str with
+  | "" -> None
+  | s :: res -> s :: explode res
 
 (* conversions *)
 let base_of_char (c : char) : base =
-  failwith "À compléter"
-
+  match c with
+  | 'A' -> A
+  | 'C' -> C
+  | 'G' -> G
+  | 'T' -> T
+  | '.' -> WC
 
 let dna_of_string (s : string) : base list =
-  failwith "À compléter"
-
+  List.filter (fun c -> base_of_char c) explode s
 
 let string_of_dna (seq : dna) : string =
-  failwith "À compléter"
-
-
+  let rec aux seq str = 
+    match seq with
+    | None -> str
+    | b :: res -> aux res (str ^ (string_of_base b))
+  in aux seq ""
 
 (*---------------------------------------------------------------------------*)
 (*                                   SLICES                                  *)
@@ -47,8 +50,12 @@ let string_of_dna (seq : dna) : string =
 
 
 (* if list = pre@suf, return Some suf. otherwise, return None *)
-let cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
-  failwith "A faire"
+let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
+  match (slice, list) with 
+  | ([], []) -> Some []
+  | (_, []) -> None
+  | ([], _) -> Some _
+  | (a :: aa, b :: bb) -> cut_prefix aa bb
 
 (*
   cut_prefix [1; 2; 3] [1; 2; 3; 4] = Some [4]
@@ -60,9 +67,15 @@ let cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
 (* return the prefix and the suffix of the first occurrence of a slice,
    or None if this occurrence does not exist.
 *)
-let first_occ (slice : 'a list) (list : 'a list)
-    : ('a list * 'a list) option =
-  failwith "À compléter"
+let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
+  let rec slice before after =
+    match (slice, after) with 
+    | ([], []) -> Some (before, [])
+    | (_, []) -> None
+    | ([], _) -> Some (before, after)
+    | (a :: aa, b :: bb) -> slice (before @ [a]) bb
+  in slice [] list
+
 (*
   first_occ [1; 2] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([1; 1], [3; 4; 1; 2])
   first_occ [1; 1] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([], [1; 2; 3; 4; 1; 2])
