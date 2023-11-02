@@ -72,19 +72,18 @@ let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
 *)
 let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
   let rec aux_first_occ slice before after =
-    let rec enleve_n lst n = 
-      match lst with
-      | [] -> []
-      | _ :: ll -> if n = 0 then lst else enleve_n ll (n-1)
-    in
-    match cut_prefix slice after with 
-      | None -> aux_first_occ slice (before @ [List.hd after]) (enleve_n after 1)
+    let cut = cut_prefix slice after in 
+    if List.length after < List.length slice then None
+    else
+      match cut with 
+      | None -> aux_first_occ slice (before @ [List.hd after]) (List.tl after)
       | Some _ -> 
-        if List.length after >= List.length slice then
-          Some (before, enleve_n after (List.length slice))
-        else None
-    in aux_first_occ slice [] list
-
+          let rec enleve_n lst n = 
+            match lst with
+            | [] -> []
+            | _ :: ll -> if n = 0 then lst else enleve_n ll (n-1)
+          in Some (before, enleve_n after (List.length slice))
+  in aux_first_occ slice [] list
 
 (*
   first_occ [1; 2] [1; 1; 1; 2; 3; 4; 1; 2] = Some ([1; 1], [3; 4; 1; 2])
@@ -92,18 +91,18 @@ let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
   first_occ [1; 3] [1; 1; 1; 2; 3; 4; 1; 2] = None
  *)
 
- let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
+let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
   match first_occ start list with
   | None -> []
-  | Some (before, after) -> 
-    match first_occ stop aft with
-    | None -> []
-    | Some (between, after) -> between :: slices_between start stop after
-    
+  | Some (_, after) -> 
+      match first_occ stop after with
+      | None -> []
+      | Some (between, _) -> between :: slices_between start stop ((List.tl start) @ after)
+
 (*
 slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
-slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]]
-slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; []]
+slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]] OK
+slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; [T]; []] OK
 *)
     
 let cut_genes (dna : dna) : (dna list) =
