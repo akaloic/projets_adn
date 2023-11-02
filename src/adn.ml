@@ -29,10 +29,10 @@ let base_of_char (c : char) : base =
   | 'G' -> G
   | 'T' -> T
   | '.' -> WC
-  | _ -> failwith "le caractère n'est pas une base"
+  | _ -> failwith "la base n'est pas valide"
 
 let dna_of_string (s : string) : base list =
-  List.map (fun c -> base_of_char c) (explode s)
+  List.map base_of_char (explode s)
 
 let string_of_dna (seq : dna) : string =
   let rec aux seq str = 
@@ -101,12 +101,35 @@ let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a 
 
 (*
 slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
-slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]] OK
-slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; [T]; []] OK
+slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]] 
+slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; [T]; []] 
 *)
     
 let cut_genes (dna : dna) : (dna list) =
+  (* du comprendre par moi même en faisant des recherches que start : "ATG" et stop : "TAA" *)
+  let start = dna_of_string "ATG" in
+  let stop = dna_of_string "TAA" in
+  slices_between start stop dna
 
+
+
+
+(*
+  "CCTGGGCATTGAGATCATTGGCACCCTGCA"; 
+  "TGTGAC.TGTAGAGCTCTTCCTGACCATGCA"; 
+  "CA";
+  ".CCAATGGCACAGC.TGGTATC..TTTGCCA"; 
+  "GCACAGC.TGGTATC..TTTGCCA";
+  "GCTCCTGGTGGAGCTGATAGTCACT.TTCCA"; 
+  "CATGGTGGTGGAGTTATTCTTGACTTTCCA";
+  "GTGGTGGAGTTATTCTTGACTTTCCA"
+   
+  "CCTGGGCATTGAGATCATTGGCACCCTGCA";
+  "TGTGACTGTAGAGCTCTTCCTGACCATGCA";
+  ".CCAATGGCACAGCTGGTATC..TTTGCCA";
+  "GCTCCTGGTGGAGCTGATAGTCACTTTCCA";
+  "CATGGTGGTGGAGTTATTCTTGACTTTCCA" 
+   *)
 
 (*---------------------------------------------------------------------------*)
 (*                          CONSENSUS SEQUENCES                              *)
