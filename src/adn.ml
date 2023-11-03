@@ -28,8 +28,7 @@ let base_of_char (c : char) : base =
   | 'C' -> C
   | 'G' -> G
   | 'T' -> T
-  | '.' -> WC
-  | _ -> failwith "la base n'est pas valide"
+  |  _ -> WC
 
 let dna_of_string (s : string) : base list =
   List.map base_of_char (explode s)
@@ -110,26 +109,6 @@ let cut_genes (dna : dna) : (dna list) =
   let start = dna_of_string "ATG" in
   let stop = dna_of_string "TAA" in
   slices_between start stop dna
-
-
-
-
-(*
-  "CCTGGGCATTGAGATCATTGGCACCCTGCA"; 
-  "TGTGAC.TGTAGAGCTCTTCCTGACCATGCA"; 
-  "CA";
-  ".CCAATGGCACAGC.TGGTATC..TTTGCCA"; 
-  "GCACAGC.TGGTATC..TTTGCCA";
-  "GCTCCTGGTGGAGCTGATAGTCACT.TTCCA"; 
-  "CATGGTGGTGGAGTTATTCTTGACTTTCCA";
-  "GTGGTGGAGTTATTCTTGACTTTCCA"
-   
-  "CCTGGGCATTGAGATCATTGGCACCCTGCA";
-  "TGTGACTGTAGAGCTCTTCCTGACCATGCA";
-  ".CCAATGGCACAGCTGGTATC..TTTGCCA";
-  "GCTCCTGGTGGAGCTGATAGTCACTTTCCA";
-  "CATGGTGGTGGAGTTATTCTTGACTTTCCA" 
-   *)
 
 (*---------------------------------------------------------------------------*)
 (*                          CONSENSUS SEQUENCES                              *)
