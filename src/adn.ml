@@ -122,7 +122,27 @@ type 'a consensus = Full of 'a | Partial of 'a * int | No_consensus
    greatest number of occurrences and this number is equal to n,
    No_consensus otherwise. the list must be non-empty *)
 let consensus (list : 'a list) : 'a consensus =
-  failwith "À compléter"
+  let rec count_occurrences result list = 
+    match list with
+    | [] -> result
+    | x :: xs ->
+        let rec find_and_increment list elem =
+          match list with
+          | [] -> (elem, 1) :: list
+          | (b, n) :: res ->
+              if b = elem then (b, n + 1) :: res
+              else (b, n) :: find_and_increment res elem
+        in
+        count_occurrences (find_and_increment result x) xs
+  in
+
+  let sorted_counts = List.sort (fun (_, count1) (_, count2) -> compare count2 count1) (count_occurrences [] list)
+  in
+
+  match sorted_counts with
+  | [] -> No_consensus
+  | (base, count) :: [] -> Full base
+  | (b1, occ1) :: (b2, occ2) :: _ -> if occ1 = occ2 then No_consensus else Partial (b1, occ1)
 
 (*
    consensus [1; 1; 1; 1] = Full 1
@@ -136,8 +156,10 @@ let consensus (list : 'a list) : 'a consensus =
    are empty, return the empty sequence.
  *)
 
-let consensus_sequence (ll : 'a list list) : 'a consensus list =
-  failwith "À compléter"
+let rec consensus_sequence (ll : 'a list list) : 'a consensus list =
+  match ll with 
+  | [] -> []
+  | x :: res -> consensus x :: consensus_sequence res
 
 (*
  consensus_sequence [[1; 1; 1; 1];
