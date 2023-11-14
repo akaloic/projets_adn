@@ -1,16 +1,36 @@
 open Regex_base
 
+type 'a expr =
+  | Eps
+  | Base of 'a
+  | Joker
+  | Concat of 'a expr * 'a expr 
+  | Alt of 'a expr * 'a expr
+  | Star of 'a expr
+
 let rec repeat n l =
-  failwith "À compléter"
+  if n = 0 then 
+    []
+  else 
+    l @ repeat (n-1) l
 
 let rec expr_repeat n e =
-  failwith "À compléter"
+  if n = 0 then 
+    Eps
+  else 
+    Concat(e, expr_repeat (n-1) e)
 
-let rec is_empty e =
-  failwith "À compléter"
+let is_empty e =
+  match e with 
+  | Eps -> true
+  | Base x -> false
+  | Joker -> false
+  | Concat (g, d) -> is_empty g && is_empty d
+  | Alt (g, d) -> is_empty g || is_empty d
+  | Star _ -> true
 
-let rec null e =
-  failwith "À compléter"
+let null e =
+  is_empty e
 
 let rec is_finite e =
   failwith "À compléter"
