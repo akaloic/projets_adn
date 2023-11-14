@@ -26,20 +26,49 @@ let is_empty e =
   | Base x -> false
   | Joker -> false
   | Concat (g, d) -> is_empty g && is_empty d
-  | Alt (g, d) -> is_empty g || is_empty d
+  | Alt (g, d) -> is_empty g && is_empty d
+  | Star x -> is_empty x  (* car Eps puissance n reste Eps *)
+  
+let rec null e =
+  match e with 
+  | Eps -> true
+  | Base x -> false
+  | Joker -> false
+  | Concat (g, d) -> null g && null d
+  | Alt (g, d) -> null g || null d
   | Star _ -> true
 
-let null e =
-  is_empty e
-
 let rec is_finite e =
-  failwith "À compléter"
+  match e with 
+  | Eps -> true
+  | Base x -> true
+  | Joker -> true
+  | Concat (g, d) -> is_finite g && is_finite d
+  | Alt (g, d) -> is_finite g && is_finite d  
+  | Star x -> is_empty x  (* car Eps puissance n reste Eps *)
 
-let product l1 l2 =
-  failwith "À compléter"
+let rec product l1 l2 =
+  match l1 with 
+  | [] -> []
+  | x :: ll ->
+      let rec aux list =
+        match list with
+        | [] -> product ll l2
+        | y :: res -> [(union_sorted x y)] @ aux res
+        in aux l2 
 
 let enumerate alphabet e =
-  failwith "À compléter"
+  if not (is_finite e) then None
+  else
+    let rec eval exp =
+      match exp with 
+      | Eps -> [[]]
+      | Base x -> [[x]]
+      | Joker -> [alphabet]
+      | Concat (g, d) -> product (eval g) (eval d)
+      | Alt (g, d) -> eval g @ eval d
+      | Star x -> [] (* car le seul où Star apparait alors que is_finite e = true c lorsque x = Eps *)
+    in Some (eval e)
 
 let rec alphabet_expr e =
   failwith "À compléter"
