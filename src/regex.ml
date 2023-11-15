@@ -47,8 +47,8 @@ let rec product l1 l2 =
       let rec aux list =
         match list with
         | [] -> product ll l2
-        | y :: res -> [(union_sorted x y)] @ aux res
-        in aux l2 
+        | y :: res -> [x @ y] @ aux res
+      in aux l2 
 
 let enumerate alphabet e =
   if not (is_finite e) then None
@@ -57,7 +57,7 @@ let enumerate alphabet e =
       match exp with 
       | Eps -> [[]]
       | Base x -> [[x]]
-      | Joker -> [alphabet]
+      | Joker -> List.map (fun x -> [x]) alphabet
       | Concat (g, d) -> product (eval g) (eval d)
       | Alt (g, d) -> eval g @ eval d
       | Star x -> [] (* car le seul où Star apparait alors que is_finite e = true c lorsque x = Eps *)
