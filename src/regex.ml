@@ -1,13 +1,5 @@
 open Regex_base
 
-type 'a expr =
-  | Eps
-  | Base of 'a
-  | Joker
-  | Concat of 'a expr * 'a expr 
-  | Alt of 'a expr * 'a expr
-  | Star of 'a expr
-
 let rec repeat n l =
   if n = 0 then 
     []
@@ -20,7 +12,7 @@ let rec expr_repeat n e =
   else 
     Concat(e, expr_repeat (n-1) e)
 
-let is_empty e =
+let rec is_empty e =
   match e with 
   | Eps -> true
   | Base x -> false
@@ -47,6 +39,7 @@ let rec is_finite e =
   | Alt (g, d) -> is_finite g && is_finite d  
   | Star x -> is_empty x  (* car Eps puissance n reste Eps *)
 
+  (* continue sur toplevel *)
 let rec product l1 l2 =
   match l1 with 
   | [] -> []
