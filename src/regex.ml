@@ -60,7 +60,7 @@ let enumerate alphabet e =
       | Joker -> List.map (fun x -> [x]) alphabet
       | Concat (g, d) -> product (eval g) (eval d)
       | Alt (g, d) -> eval g @ eval d
-      | Star x -> [] (* car le seul où Star apparait alors que is_finite e = true c lorsque x = Eps *)
+      | Star x -> [] (* car le seul cas où Star apparait alors que is_finite e = true c lorsque x = Eps *)
     in Some (eval e)
 
 let rec alphabet_expr e =
