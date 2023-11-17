@@ -65,13 +65,34 @@ let enumerate alphabet e =
 
 let rec alphabet_expr e =
   match enumerate [] e with
-  | None -> failwith "Infinite language, cannot determine alphabet."
+  | None -> None
   | Some language ->
     let alpha = List.flatten language in
-    List.sort_uniq compare alpha
+    let alphabet = List.sort_uniq compare alpha in
+    Some alphabet
 
 type answer =
   Infinite | Accept | Reject
 
 let accept_partial e w =
-  failwith "À compléter"
+  let alphabet = alphabet_expr e in
+  match (alphabet, enumerate (Option.get alphabet) e) with
+  | (Some alpha, Some language_e) ->
+    let flattened_language_e = List.flatten language_e in
+    let resultat =
+      if not (is_finite e) then Infinite
+      else if List.for_all (fun c -> List.mem c alpha) w && List.mem w flattened_language_e then Accept
+      else Reject
+    in
+    resultat
+  | _ -> Infinite
+      
+  let e = Alt (Concat (Base 'a', Star (Base 'b')), Joker)
+let w_accept = "abbbb"
+let w_reject = "ac"
+let status_accept = language_status e w_accept
+let status_reject = language_status e w_reject
+
+(* Printing the results *)
+print_endline (match status_accept with Infinite -> "Infinite" | Accept -> "Accept" | Reject -> "Reject");
+print_endline (match status_reject with Infinite -> "Infinite" | Accept -> "Accept" | Reject -> "Reject");
