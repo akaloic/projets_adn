@@ -64,7 +64,11 @@ let enumerate alphabet e =
     in Some (eval e)
 
 let rec alphabet_expr e =
-  failwith "À compléter"
+  match enumerate [] e with
+  | None -> failwith "Infinite language, cannot determine alphabet."
+  | Some language ->
+    let alpha = List.flatten language in
+    List.sort_uniq compare alpha
 
 type answer =
   Infinite | Accept | Reject
