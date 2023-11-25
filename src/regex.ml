@@ -63,21 +63,20 @@ let enumerate alphabet e =
       | Star x -> [] (* car le seul cas où Star apparait alors que is_finite e = true c lorsque x = Eps *)
     in Some (eval e)
 
-let rec alphabet_expr e =
+let alphabet_expr e =
   match enumerate [] e with
-  | None -> None
+  | None -> []
   | Some language ->
     let alpha = List.flatten language in
-    let alphabet = List.sort_uniq compare alpha in
-    Some alphabet
+    List.sort_uniq compare alpha
 
 type answer =
   Infinite | Accept | Reject
 
 let accept_partial e w =
   let alphabet = alphabet_expr e in
-  match (alphabet, enumerate (Option.get alphabet) e) with
-  | (Some alpha, Some language_e) ->
+  match (alphabet, enumerate alphabet e) with
+  | (alpha, Some language_e) ->
     let resultat =
       if not (is_finite e) then Infinite
       else if List.for_all (fun c -> List.mem c alpha) w && List.mem w language_e then Accept
@@ -85,13 +84,3 @@ let accept_partial e w =
     in
     resultat
   | _ -> Infinite
-
-  let e = Alt (Concat (Base 'a', Star (Base 'b')), Joker)
-let w_accept = ['a'; 'b'; 'b'; 'b'; 'b']
-let w_reject = ['a'; 'c']
-let status_accept = accept_partial e w_accept;
-let status_reject = accept_partial e w_reject;
-
-(* Printing the results *)
-print_endline (match status_accept with Infinite -> "Infinite" | Accept -> "Accept" | Reject -> "Reject");
-print_endline (match status_reject with Infinite -> "Infinite" | Accept -> "Accept" | Reject -> "Reject");
