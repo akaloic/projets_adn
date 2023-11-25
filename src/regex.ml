@@ -65,10 +65,19 @@ let enumerate alphabet e =
 
 let alphabet_expr e =
   match enumerate [] e with
-  | None -> []
   | Some language ->
     let alpha = List.flatten language in
     List.sort_uniq compare alpha
+  | None -> 
+    let rec aux exp =
+      match exp with 
+      | Eps -> []
+      | Base x -> [x]
+      | Joker -> []
+      | Concat (g, d) -> aux g @ aux d
+      | Alt (g, d) -> aux g @ aux d
+      | Star x -> aux x
+    in List.sort_uniq compare (aux e)
 
 type answer =
   Infinite | Accept | Reject
