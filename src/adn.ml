@@ -52,11 +52,11 @@ let string_of_dna (seq : dna) : string =
 (* if list = pre@suf, return Some suf. otherwise, return None *)
 let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
   match (slice, list) with 
-  | ([], []) -> Some []
-  | (_, []) -> None
-  | ([], res) -> Some res
+  | ([], []) -> Some []                       (*si slice et list sont vides on retourne Some [] car cela veut dire que slice et list sont les memes*)
+  | (_, []) -> None                            (*si list est vide et slice non, on retourne None car cela veut dire que slice n'est pas un prefixe de list*)
+  | ([], res) -> Some res                     (*si slice est vide et list non, on retourne Some res car c'est list avec slice en moins*)
   | (a :: aa, b :: bb) -> 
-    if a=b then cut_prefix aa bb
+    if a=b then cut_prefix aa bb              (*si a=b on recommence avec aa et bb*)
     else None
 
 (*
