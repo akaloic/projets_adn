@@ -4,14 +4,15 @@ let rec repeat n l =
   if n = 0 then 
     []
   else 
-    l @ repeat (n-1) l
+    l @ repeat (n-1) l          (* on concatene la liste avec elle-même n fois*)
 
 let rec expr_repeat n e =
   if n = 0 then 
     Eps
   else 
-    Concat(e, expr_repeat (n-1) e)
+    Concat(e, expr_repeat (n-1) e)   (*on concatene l'expression avec elle meme n fois*)
 
+    (*Pour is_empty, null et is_finite on verifie que e est respectivement vide, null ou fini avec les conditions sur eps,Base et Joker*)
 let rec is_empty e =
   match e with 
   | Eps -> true
@@ -82,13 +83,15 @@ type answer =
   Infinite | Accept | Reject
 
 let accept_partial e w =
-  let alphabet = alphabet_expr e in
+  let alphabet = alphabet_expr e in     (* on récupère l'alphabet de l'expression *)
   match (alphabet, enumerate alphabet e) with
-  | (alpha, Some language_e) ->
+  | (alpha, Some language_e) ->   (* si l'énumération est possible *)
     let resultat =
-      if not (is_finite e) then Infinite
-      else if List.for_all (fun c -> List.mem c alpha) w && List.mem w language_e then Accept
-      else Reject
+      if not (is_finite e) then Infinite          (*si is_finite renvoie false alors e est un langage infini donc on renvoie infinite*)
+      else if List.for_all (fun c -> List.mem c alpha) w && List.mem w language_e then Accept   (*Si les 2 conditions sont respectées alors on Accepte*)
+      else Reject   (* sinon on renvoie Reject *)
     in
     resultat
-  | _ -> Infinite
+  | _ -> Infinite     (* si l'énumération n'est pas possible, on renvoie Infinite *)
+
+  (*Pour la ligne 91 : on verifie que tout les caractere de w appartiennent à l'alphabet alpha. De l'autre cote, on verifie que w appartient bien au langage*)
