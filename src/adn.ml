@@ -7,7 +7,7 @@ type dna = base list
 (*---------------------------------------------------------------------------*)
 
 
-let string_of_base (b : base) : string =
+let string_of_base (b : base) : string =    (*convertit une base b en string*)
   match b with
   | A -> "A"
   | C -> "C"
@@ -18,11 +18,11 @@ let string_of_base (b : base) : string =
 (* explode a string into a char list *)
 let rec explode (str : string) : char list =
   match str with
-  | "" -> []
-  | _ -> str.[0] :: explode (String.sub str 1 ((String.length str) - 1))
+  | "" -> []    (* si str est vide on retourne []*)
+  | _ -> str.[0] :: explode (String.sub str 1 ((String.length str) - 1)) (*sinon on ajoute le 1er caractere de str a la liste et on recommence avec le reste de str *)
 
 (* conversions *)
-let base_of_char (c : char) : base =
+let base_of_char (c : char) : base =  (*convertit un char c en base*)
   match c with
   | 'A' -> A
   | 'C' -> C
@@ -30,14 +30,14 @@ let base_of_char (c : char) : base =
   | 'T' -> T
   |  _ -> WC
 
-let dna_of_string (s : string) : base list =
-  List.map base_of_char (explode s)
+let dna_of_string (s : string) : base list =  (*convertit un string s en list de base*)
+  List.map base_of_char (explode s)           (*on applique base_of_char à tout le resultat de explode s*)
 
 let string_of_dna (seq : dna) : string =
   let rec aux seq str = 
     match seq with
-    | [] -> str
-    | b :: bs -> aux bs (str ^ (string_of_base b))
+    | [] -> str                               (*si seq est vide on retourne str*)
+    | b :: bs -> aux bs (str ^ (string_of_base b))    (*sinon on ajoute le string de la base b a str et on recommence avec le reste*)
   in aux seq ""
 
 (*---------------------------------------------------------------------------*)
