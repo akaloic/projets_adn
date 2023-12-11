@@ -103,7 +103,7 @@ slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
 slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]] 
 slices_between [A] [G] [A; C; T; G; G; A; C; T; A; T; G; A; G] = [[C; T]; [C; T; A; T]; [T]; []] 
 *)
-    
+
 let cut_genes (dna : dna) : (dna list) =
   let start = dna_of_string "ATG" in    
   let stop = dna_of_string "TAA" in
@@ -120,7 +120,7 @@ type 'a consensus = Full of 'a | Partial of 'a * int | No_consensus
    (Partial (a, n)) if a is the only element of the list with the
    greatest number of occurrences and this number is equal to n,
    No_consensus otherwise. the list must be non-empty *)
-let consensus (list : 'a list) : 'a consensus =
+(* let consensus (list : 'a list) : 'a consensus =
   let rec count_occurrences result list =   (* on compte le nombre d'occurences de chaque element de list afin de les trier par ordre decroissant *)
     match list with
     | [] -> result    (* si list est vide, on retourne result qui represente le nombre d'occurences de chaque element de list *)
@@ -133,6 +133,30 @@ let consensus (list : 'a list) : 'a consensus =
               else (b, n) :: find_and_increment res elem    (* sinon on continue de chercher elem *)
         in
         count_occurrences (find_and_increment result x) xs
+  in
+
+  let list_decroissant = List.sort (fun (_, count1) (_, count2) -> compare count2 count1) (count_occurrences [] list)   
+  (* on trie les elements de list par ordre decroissant de leur nombre d'occurences grace a count_occurrences qui nous retourne une liste de duplets (element, nombre d'occurences) *)
+  in
+
+  match list_decroissant with
+  | [] -> No_consensus  (* si list_decroissant est vide, on retourne No_consensus *)
+  | (base, count) :: [] -> Full base  (* si list_decroissant contient un seul element, on retourne Full base *)
+  | (b1, occ1) :: (b2, occ2) :: _ -> if occ1 = occ2 then No_consensus else Partial (b1, occ1) si list_decroissant contient au moins deux elements, on regarde si les deux premiers ont le meme nombre d'occurences, si oui on retourne No_consensus, sinon on retourne Partial (b1, occ1) *)
+
+let consensus (list : 'a list) : 'a consensus =
+  let rec count_occurrences acc list =   (* on compte le nombre d'occurences de chaque element de list afin de les trier par ordre decroissant *)
+    match list with
+    | [] -> acc    (* si list est vide, on retourne acc qui represente le nombre d'occurences de chaque element de list *)
+    | x :: xs ->
+        let rec find_and_increment acc elem =    (* on cherche elem dans acc et on incremente son nombre d'occurences *)
+          match acc with
+          | [] -> count_occurrences ((elem, 1) :: acc) xs
+          | (b, n) :: res ->
+              if b = elem then count_occurrences ((b, n + 1) :: res) xs  (* si on trouve elem, on incremente son nombre d'occurences *)
+              else find_and_increment ((b, n) :: res) elem    (* sinon on continue de chercher elem *)
+        in
+        find_and_increment acc x
   in
 
   let list_decroissant = List.sort (fun (_, count1) (_, count2) -> compare count2 count1) (count_occurrences [] list)   
