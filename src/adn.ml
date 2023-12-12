@@ -171,15 +171,19 @@ let consensus (list : 'a list) : 'a consensus =
         find_and_increment acc x
   in
 
-  let list_decroissant = List.sort (fun (_, count1) (_, count2) -> compare count2 count1) (count_occurrences [] list)   
-  (* on trie les elements de list par ordre decroissant de leur nombre d'occurences grace a count_occurrences qui nous retourne une liste de duplets (element, nombre d'occurences) *)
+  let rec sort_and_consensus acc remaining_list =
+    match remaining_list with
+    | [] ->  (* si la liste restante est vide *)
+        (match acc with
+         | [] -> No_consensus  (* si la liste triée est vide, on retourne No_consensus *)
+         | [(base, count)] -> Full base  (* si la liste triée contient un seul élément, on retourne Full base *)
+         | (b1, occ1):: (b2, occ2) ::_ -> if occ1 = occ2 then No_consensus else Partial (b1, occ1))  (* si la liste triée contient au moins deux éléments, on compare les deux premiers *)
+    | _ :: _ ->
+        let sorted_list = List.sort (fun (_, count1) (_, count2) -> compare count2 count1) (count_occurrences [] remaining_list) in     (*cela tri par ordre croissant du nompbre d'occurence*)
+        sort_and_consensus sorted_list []
   in
 
-  match list_decroissant with
-  | [] -> No_consensus  (* si list_decroissant est vide, on retourne No_consensus *)
-  | (base, count) :: [] -> Full base  (* si list_decroissant contient un seul element, on retourne Full base *)
-  | (b1, occ1) :: (b2, occ2) :: _ -> if occ1 = occ2 then No_consensus else Partial (b1, occ1) (* si list_decroissant contient au moins deux elements, on regarde si les deux premiers ont le meme nombre d'occurences, si oui on retourne No_consensus, sinon on retourne Partial (b1, occ1) *)
-
+  sort_and_consensus [] list
 (*
    consensus [1; 1; 1; 1] = Full 1
    consensus [1; 1; 1; 2] = Partial (1, 3)
