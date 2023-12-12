@@ -92,14 +92,24 @@ let first_occ (slice : 'a list) (list : 'a list) : ('a list * 'a list) option =
   first_occ [1; 3] [1; 1; 1; 2; 3; 4; 1; 2] = None
  *)
 
-let rec slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
-  match first_occ start list with   (* on recupere la premiere occurence de start dans list afin de recuperer le prefixe *)
-  | None -> []
-  | Some (_, after) ->
-      match first_occ stop after with (* on recupere la premiere occurence de stop dans after afin de recuperer le suffixe *)
-      | None -> []  (* si on ne trouve pas de stop dans after, on retourne [] *)
-      | Some (between, _) -> between :: slices_between start stop ((List.tl start) @ after) (* on ajoute between a la liste et on recommence avec le suffixe et le prefixe de start *)
-
+ let slices_between (start : 'a list) (stop : 'a list) (list : 'a list) : 'a list list =
+  let rec find_stop acc lst =                               (*on cherche le premier stop dans lst*)
+    match lst with
+    | [] -> (List.rev acc, [])                              (*si lst est vide, on retourne (List.rev acc, []) car le stop n'a pas été trouvé*)
+    | hd :: tl ->
+      if List.length acc >= List.length stop && List.rev (List.tl (List.rev acc)) = stop then       (*si la taille de acc est plus grande ou egale a celle de stop et que le suffixe de acc est egal a stop, on retourne (List.rev (List.tl (List.rev acc)), tl) *)
+        (List.rev (List.tl (List.rev acc)), tl)
+      else find_stop (hd :: acc) tl                                                                   (*sinon on ajoute hd a acc et on recommence *)
+  in
+  let rec aux acc lst =                                                          (*on cherche le premier start dans lst*)
+    match first_occ start lst with
+    | None -> List.rev acc
+    | Some (_, after_start) ->                                                (*si on trouve un start, on cherche le premier stop dans after_start*)
+      match find_stop [] after_start with
+      | between, after_stop ->
+        aux (between :: acc) ((List.tl start) @ after_stop)                     (*on ajoute between a acc et on recommence avec le suffixe et le prefixe de start*)
+  in
+  aux [] list
 (*
 slices_between [1; 1] [1; 2] [1; 1; 1; 1; 2; 1; 3; 1; 2] = [[1]; []; [2; 1; 3]]
 slices_between [1; 2] [4; 1] [1; 1; 2; 3; 2; 1; 4; 1; 2] = [[3; 2 ;1]] 
