@@ -50,15 +50,17 @@ let string_of_dna (seq : dna) : string =
 
 
 (* if list = pre@suf, return Some suf. otherwise, return None *)
-let rec cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
-  match (slice, list) with 
-  | ([], []) -> Some []                       (*si slice et list sont vides on retourne Some [] car cela veut dire que slice et list sont les memes*)
-  | (_, []) -> None                            (*si list est vide et slice non, on retourne None car cela veut dire que slice n'est pas un prefixe de list*)
-  | ([], res) -> Some res                     (*si slice est vide et list non, on retourne Some res car c'est list avec slice en moins*)
-  | (a :: aa, b :: bb) -> 
-    if a=b then cut_prefix aa bb              (*si a=b on recommence avec aa et bb*)
-    else None
 
+
+let cut_prefix (slice : 'a list) (list : 'a list) : 'a list option =
+  let rec aux sliceAcc listAcc sliceReste listReste =             (*utilisation d'une fonction auxiliaire pour pouvoir utiliser des accumulateurs*)
+    match (sliceReste, listReste) with                             (*on compare sliceReste et listReste qui sont les restes de slice et list*)
+    | ([],_) -> Some (List.rev sliceAcc)                          (*si sliceReste est vide, on retourne Some (List.rev sliceAcc) car sliceAcc est le prefixe de slice inversé*)
+    | (a :: aa, b :: bb) ->
+      if a = b then aux (a::sliceAcc) (b::listAcc) aa bb          (*si a=b on recommence avec a::sliceAcc et b::listAcc*)
+      else None
+    | (_, []) -> None                                               (*si listReste est vide et sliceReste non, on retourne None car cela veut dire que slice n'est pas un prefixe de list*)
+  in aux [] [] slice list
 (*
   cut_prefix [1; 2; 3] [1; 2; 3; 4] = Some [4]
   cut_prefix [1; 2; 3; 4] [1; 2; 3; 4] = Some []
